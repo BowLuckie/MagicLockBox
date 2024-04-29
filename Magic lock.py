@@ -7,7 +7,8 @@ class MagicLockSimulator:
         self.root.title("Magic Lock Simulator")
 
         self.grid_size = 4
-        self.grid = [[False for _ in range(self.grid_size)] for _ in range(self.grid_size)]  # Initialize with black squares
+        self.initial_grid = [[False for _ in range(self.grid_size)] for _ in range(self.grid_size)]  # Initialize with black squares
+        self.grid = [row[:] for row in self.initial_grid]
 
         self.create_grid()
         self.create_buttons()
@@ -40,6 +41,9 @@ class MagicLockSimulator:
         for j in range(self.grid_size):
             ttk.Button(self.root, text=f"Shift Up {j}", command=lambda j=j: self.shift_col_up(j)).grid(row=self.grid_size+1, column=j, padx=2, pady=5)
             ttk.Button(self.root, text=f"Shift Down {j}", command=lambda j=j: self.shift_col_down(j)).grid(row=self.grid_size+2, column=j, padx=2, pady=5)
+
+        # Reset button
+        ttk.Button(self.root, text="Reset", command=self.reset_grid).grid(row=self.grid_size+1, column=self.grid_size+3, pady=5)
 
     def toggle_color(self, i, j):
         self.grid[i][j] = not self.grid[i][j]
@@ -75,6 +79,10 @@ class MagicLockSimulator:
         temp_col = [temp_col[-1]] + temp_col[:-1]
         for i in range(self.grid_size):
             self.grid[i][column] = temp_col[i]
+        self.update_grid()
+
+    def reset_grid(self):
+        self.grid = [row[:] for row in self.initial_grid]
         self.update_grid()
 
     def update_grid(self):
