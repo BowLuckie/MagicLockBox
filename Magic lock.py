@@ -1,105 +1,106 @@
 import tkinter as tk
-from tkinter import ttk
 
-class MagicLockSimulator:
+
+class GridButton(tk.Button):
+    def __init__(self, master, row, col, color='white', **kwargs):
+        self.row = row
+        self.col = col
+        self.color = color
+
+        # Bind toggle method to button click
+        tk.Button.__init__(self, master, bg=color, width=3, height=1, command=self.toggle, **kwargs)
+
+    def toggle(self):
+        self.color = 'black' if self.color == 'white' else 'white'
+        self.config(bg=self.color)
+
+
+class GridApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Magic Lock Simulator")
-
-        self.grid_size = 4
-        self.initial_grid = [[True for _ in range(self.grid_size)] for _ in range(self.grid_size)]  # Initialize with white squares
-        self.grid = [row[:] for row in self.initial_grid]
-
         self.create_grid()
-        self.create_buttons()
+        self.create_controls()
 
     def create_grid(self):
-        self.buttons = []
-        for i in range(self.grid_size):
+        self.grid_buttons = []
+        for row in range(4):
             row_buttons = []
-            for j in range(self.grid_size):
-                button = ttk.Button(self.root, width=5, command=lambda i=i, j=j: self.toggle_color(i, j))
-                button.grid(row=i, column=j, padx=2, pady=2)
+            for col in range(4):
+                button = GridButton(self.root, row, col)
+                button.grid(row=row, column=col, padx=5, pady=5)
                 row_buttons.append(button)
-            self.buttons.append(row_buttons)
+            self.grid_buttons.append(row_buttons)
 
-    def create_buttons(self):
-        # Flip buttons for each row
-        for i in range(self.grid_size):
-            ttk.Button(self.root, text=f"Flip Row {i}", command=lambda i=i: self.flip_row(i)).grid(row=i, column=self.grid_size, padx=5, pady=2)
+        # Add row buttons
+        for row in range(4):
+            shift_left_btn = tk.Button(self.root, text="Shift Left", command=lambda r=row: self.shift_row_left(r))
+            shift_left_btn.grid(row=row, column=4, padx=5, pady=5)
+            shift_right_btn = tk.Button(self.root, text="Shift Right", command=lambda r=row: self.shift_row_right(r))
+            shift_right_btn.grid(row=row, column=5, padx=5, pady=5)
+            flip_btn = tk.Button(self.root, text="Flip", command=lambda r=row: self.flip_row(r))
+            flip_btn.grid(row=row, column=6, padx=5, pady=5)
 
-        # Flip buttons for each column
-        for j in range(self.grid_size):
-            ttk.Button(self.root, text=f"Flip Col {j}", command=lambda j=j: self.flip_column(j)).grid(row=self.grid_size, column=j, padx=2, pady=5)
+        # Add column buttons
+        for col in range(4):
+            shift_up_btn = tk.Button(self.root, text="Shift Up", command=lambda c=col: self.shift_col_up(c))
+            shift_up_btn.grid(row=4, column=col, padx=5, pady=5)
+            shift_down_btn = tk.Button(self.root, text="Shift Down", command=lambda c=col: self.shift_col_down(c))
+            shift_down_btn.grid(row=5, column=col, padx=5, pady=5)
+            flip_btn = tk.Button(self.root, text="Flip", command=lambda c=col: self.flip_col(c))
+            flip_btn.grid(row=6, column=col, padx=5, pady=5)
 
-        # Shift buttons for each row
-        for i in range(self.grid_size):
-            ttk.Button(self.root, text=f"Shift Left {i}", command=lambda i=i: self.shift_row_left(i)).grid(row=i, column=self.grid_size+1, padx=5, pady=2)
-            ttk.Button(self.root, text=f"Shift Right {i}", command=lambda i=i: self.shift_row_right(i)).grid(row=i, column=self.grid_size+2, padx=5, pady=2)
-
-        # Shift buttons for each column
-        for j in range(self.grid_size):
-            ttk.Button(self.root, text=f"Shift Up {j}", command=lambda j=j: self.shift_col_up(j)).grid(row=self.grid_size+1, column=j, padx=2, pady=5)
-            ttk.Button(self.root, text=f"Shift Down {j}", command=lambda j=j: self.shift_col_down(j)).grid(row=self.grid_size+2, column=j, padx=2, pady=5)
-
-        # Reset button
-        ttk.Button(self.root, text="Reset", command=self.reset_grid).grid(row=self.grid_size+1, column=self.grid_size+3, pady=5)
-
-    def toggle_color(self, i, j):
-        self.grid[i][j] = not self.grid[i][j]
-        self.update_grid()
-
-    def flip_row(self, row):
-        for j in range(self.grid_size):
-            self.grid[row][j] = not self.grid[row][j]
-        self.update_grid()
-
-    def flip_column(self, column):
-        for i in range(self.grid_size):
-            self.grid[i][column] = not self.grid[i][column]
-        self.update_grid()
+    def create_controls(self):
+        pass  # Remove global controls
 
     def shift_row_left(self, row):
-        self.grid[row] = self.grid[row][1:] + [self.grid[row][0]]
-        self.update_grid()
+        # Implement shifting row left
+        first_color = self.grid_buttons[row][0].color
+        for col in range(3):
+            self.grid_buttons[row][col].color = self.grid_buttons[row][col+1].color
+            self.grid_buttons[row][col].config(bg=self.grid_buttons[row][col].color)
+        self.grid_buttons[row][3].color = first_color
+        self.grid_buttons[row][3].config(bg=first_color)
 
     def shift_row_right(self, row):
-        self.grid[row] = [self.grid[row][-1]] + self.grid[row][:-1]
-        self.update_grid()
+        # Implement shifting row right
+        last_color = self.grid_buttons[row][3].color
+        for col in range(3, 0, -1):
+            self.grid_buttons[row][col].color = self.grid_buttons[row][col-1].color
+            self.grid_buttons[row][col].config(bg=self.grid_buttons[row][col].color)
+        self.grid_buttons[row][0].color = last_color
+        self.grid_buttons[row][0].config(bg=last_color)
 
-    def shift_col_up(self, column):
-        temp_col = [self.grid[i][column] for i in range(self.grid_size)]
-        temp_col = temp_col[1:] + [temp_col[0]]
-        for i in range(self.grid_size):
-            self.grid[i][column] = temp_col[i]
-        self.update_grid()
+    def shift_col_up(self, col):
+        # Implement shifting column up
+        first_color = self.grid_buttons[0][col].color
+        for row in range(3):
+            self.grid_buttons[row][col].color = self.grid_buttons[row+1][col].color
+            self.grid_buttons[row][col].config(bg=self.grid_buttons[row][col].color)
+        self.grid_buttons[3][col].color = first_color
+        self.grid_buttons[3][col].config(bg=first_color)
 
-    def shift_col_down(self, column):
-        temp_col = [self.grid[i][column] for i in range(self.grid_size)]
-        temp_col = [temp_col[-1]] + temp_col[:-1]
-        for i in range(self.grid_size):
-            self.grid[i][column] = temp_col[i]
-        self.update_grid()
+    def shift_col_down(self, col):
+        # Implement shifting column down
+        last_color = self.grid_buttons[3][col].color
+        for row in range(3, 0, -1):
+            self.grid_buttons[row][col].color = self.grid_buttons[row-1][col].color
+            self.grid_buttons[row][col].config(bg=self.grid_buttons[row][col].color)
+        self.grid_buttons[0][col].color = last_color
+        self.grid_buttons[0][col].config(bg=last_color)
 
-    def reset_grid(self):
-        self.grid = [row[:] for row in self.initial_grid]
-        self.update_grid()
+    def flip_row(self, row):
+        # Implement flipping row by toggling colors
+        for col in range(4):
+            self.grid_buttons[row][col].toggle()
 
-    def update_grid(self):
-        for i in range(self.grid_size):
-            for j in range(self.grid_size):
-                if self.grid[i][j]:
-                    self.buttons[i][j].configure(style="White.TButton")
-                else:
-                    self.buttons[i][j].configure(style="Black.TButton")
+    def flip_col(self, col):
+        # Implement flipping column by toggling colors
+        for row in range(4):
+            self.grid_buttons[row][col].toggle()
 
-def main():
-    root = tk.Tk()
-    style = ttk.Style(root)
-    style.configure("Black.TButton", background="black")
-    style.configure("White.TButton", background="white")
-    app = MagicLockSimulator(root)
-    root.mainloop()
 
 if __name__ == "__main__":
-    main()
+    root = tk.Tk()
+    root.title("Grid Operations")
+    app = GridApp(root)
+    root.mainloop()
