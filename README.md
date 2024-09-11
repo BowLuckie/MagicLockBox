@@ -1,6 +1,3 @@
-Here's a more polished version of the instructions:
-
----
 
 # **Magic Lock Box**
 
