@@ -1,4 +1,4 @@
-@@ -0,0 +1,106 @@
+
 import tkinter as tk
 class GridButton(tk.Button):
     def __init__(self, master, row, col, color='white', **kwargs):
